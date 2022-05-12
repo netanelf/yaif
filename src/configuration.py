@@ -7,18 +7,21 @@ IMAGE_DIRS = [
     r'/home/netanel/Pictures',
 ]
 
+DB_PATH = 'images.db'
+
 ########################################################################################################################
 
 
 @dataclass
 class Configuration:
     image_dirs: List[str]
+    images_db_file_path: str
     display_time_sec: int = field(default=10)
 
 
 def get_default_configuration():
     c = Configuration(
-        image_dirs=IMAGE_DIRS
+        image_dirs=IMAGE_DIRS,
+        images_db_file_path=DB_PATH
     )
-
     return c
