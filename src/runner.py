@@ -1,10 +1,10 @@
 import logging
-import time
-from datetime import datetime
+import tkinter as tk
 
 import configuration
 from mysql_db import MySqlDb
 from fs_monitor import FileSystemMonitor
+from display import Display
 
 
 def init_logging(level):
@@ -21,7 +21,8 @@ def main():
     cfg = configuration.get_default_configuration()
     db = MySqlDb(cfg.images_db_file_path)
     mon = FileSystemMonitor(cfg=cfg, db=db)
-    time.sleep(60*5)
+    display = Display(cfg)
+    display.mainloop()
 
 
 

@@ -17,6 +17,7 @@ class FileSystemMonitor:
         self._cache: Dict[str, Image] = self._create_cache()
         self._run_periodic_monitor = True
         self._periodic_th = Thread(target=self.run)
+        self._periodic_th.setDaemon(True)
         self._periodic_th.start()
 
     def stop_periodic_monitor(self):
