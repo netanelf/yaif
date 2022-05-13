@@ -4,28 +4,33 @@ import sqlite3
 from datetime import datetime
 
 from db_base import DbBase
-from src.data_structs.image import Image, Resolution
+from src.data_structs.image import Image
 
 
 class MySqlDb(DbBase):
-
 
     IMAGES_TABLE_NAME = 'images'
     CREATE_IMAGES_Q = \
     f"""
     CREATE TABLE {IMAGES_TABLE_NAME} (
         image_path TEXT PRIMARY KEY,
-        resolution_x INTEGER NOT NULL,
-        resolution_y INTEGER NOT NULL,
-        shown_counter INTEGER,
-        last_shown TIMESTAMP
+        view_count INTEGER,
+        last_view_ts TIMESTAMP,
+        do_not_show_image INTEGER,
+        comment TEXT
     );
     """
 
     ADD_IMAGE_Q = \
     f"""
-    INSERT INTO {IMAGES_TABLE_NAME} (image_path, resolution_x, resolution_y, shown_counter, last_shown)
+    INSERT INTO {IMAGES_TABLE_NAME} (image_path, view_count, last_view_ts, do_not_show_image, comment)
     VALUES (?,?,?,?,?)
+    """
+
+    REMOVE_IMAGE_Q = \
+    f"""
+    DELETE FROM {IMAGES_TABLE_NAME}
+    WHERE image_path = ?
     """
 
     GET_IMAGES_Q = \
@@ -42,30 +47,35 @@ class MySqlDb(DbBase):
     UPDATE_IMAGE_VIEWS_Q = \
     f"""
     UPDATE {IMAGES_TABLE_NAME}
-    SET shown_counter = ?
+    SET view_count = ?
     WHERE image_path = ?
     """
 
     UPDATE_IMAGE_LAST_VIEW_TIME_Q = \
     f"""
     UPDATE {IMAGES_TABLE_NAME}
-    SET last_shown = ?
+    SET last_view_ts = ?
     WHERE image_path = ?
     """
 
     def __init__(self, db_file: str):
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._con = sqlite3.connect(db_file)
+        self._con = sqlite3.connect(db_file, check_same_thread=False)
         self._con.row_factory = sqlite3.Row
         self._initialize_db()
 
     def add_image_to_db(self, im: Image):
         self._logger.debug(f'adding {im} into DB')
         self._con.execute(self.ADD_IMAGE_Q, (im.image_path,
-                                             im.image_resolution.x,
-                                             im.image_resolution.y,
-                                             0,
-                                             datetime.min))
+                                             im.view_count,
+                                             im.last_view_ts,
+                                             im.do_not_show_image,
+                                             im.comment))
+        self._con.commit()
+
+    def remove_image_from_db(self, im: Image):
+        self._logger.debug(f'removing {im} from DB')
+        self._con.execute(self.REMOVE_IMAGE_Q, (im.image_path,))
         self._con.commit()
 
     def get_all_images_in_db(self) -> List[Image]:
@@ -73,10 +83,10 @@ class MySqlDb(DbBase):
         images = []
         for row in c:
             images.append(Image(image_path=row['image_path'],
-                                image_resolution=Resolution(
-                                    x=row['resolution_x'],
-                                    y=row['resolution_y']
-                                ))
+                                view_count=row['view_count'],
+                                last_view_ts=row['last_view_ts'],
+                                do_not_show_image=row['do_not_show_image'],
+                                comment=row['comment'])
             )
 
         self._logger.debug(f'get_all_images_in_db found {len(images)} images')
@@ -85,7 +95,7 @@ class MySqlDb(DbBase):
     def update_image_view_count(self, image: Image) -> int:
         c = self._con.execute(self.GET_IMAGE_Q, (image.image_path,))
         im = c.fetchone()
-        current_views = im['shown_counter']
+        current_views = im['view_count']
         self._con.execute(self.UPDATE_IMAGE_VIEWS_Q, (current_views + 1, image.image_path))
         self._con.commit()
         return current_views + 1

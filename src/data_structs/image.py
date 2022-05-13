@@ -4,15 +4,10 @@ from datetime import datetime
 
 
 @dataclass
-class Resolution:
-    x: int
-    y: int
-
-
-@dataclass
 class Image:
     image_path: str
-    image_resolution: Resolution
     view_count: int = field(default=0)
     last_view_ts: datetime = field(default=datetime.min)
+    do_not_show_image: bool = field(default=False)
+    comment: str = field(default='')
 

@@ -11,6 +11,10 @@ class DbBase(ABC):
         pass
 
     @abstractmethod
+    def remove_image_from_db(self, im: Image):
+        pass
+
+    @abstractmethod
     def get_all_images_in_db(self) -> List[Image]:
         pass
 
