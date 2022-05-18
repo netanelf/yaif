@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Tuple
 
 
 ########################################### DEFAULT CONFIGURATION  #####################################################
@@ -19,6 +19,7 @@ class Configuration:
     display_time_sec: int = field(default=10)
     supported_image_extensions: List[str] = field(default_factory=lambda: ['png', 'jpg'])
     periodic_monitor_freq_sec: int = field(default=60)
+    screen_size: Tuple[int] = field(default_factory=lambda: (1080, 1920))  #h, w
 
 
 def get_default_configuration():

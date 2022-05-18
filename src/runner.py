@@ -4,6 +4,7 @@ import tkinter as tk
 import configuration
 from mysql_db import MySqlDb
 from fs_monitor import FileSystemMonitor
+from image_list import ImageList
 from display import Display
 
 
@@ -21,7 +22,8 @@ def main():
     cfg = configuration.get_default_configuration()
     db = MySqlDb(cfg.images_db_file_path)
     mon = FileSystemMonitor(cfg=cfg, db=db)
-    display = Display(cfg)
+    image_list = ImageList(db=db)
+    display = Display(cfg, image_list)
     display.mainloop()
 
 

@@ -38,6 +38,11 @@ class MySqlDb(DbBase):
     SELECT * FROM {IMAGES_TABLE_NAME}
     """
 
+    GET_IMAGES_COUNT_Q = \
+    f"""
+    SELECT count(*) FROM {IMAGES_TABLE_NAME}
+    """
+
     GET_IMAGE_Q = \
     f"""
     SELECT * FROM {IMAGES_TABLE_NAME}
@@ -91,6 +96,10 @@ class MySqlDb(DbBase):
 
         self._logger.debug(f'get_all_images_in_db found {len(images)} images')
         return images
+
+    def get_images_count(self) -> int:
+        c = self._con.execute(self.GET_IMAGES_COUNT_Q)
+        return c.fetchone()[0]
 
     def update_image_view_count(self, image: Image) -> int:
         c = self._con.execute(self.GET_IMAGE_Q, (image.image_path,))

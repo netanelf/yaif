@@ -19,6 +19,10 @@ class DbBase(ABC):
         pass
 
     @abstractmethod
+    def get_images_count(self) -> int:
+        pass
+
+    @abstractmethod
     def update_image_view_count(self, image: Image) -> int:
         """
         increment view count by one

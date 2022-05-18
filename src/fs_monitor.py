@@ -32,7 +32,6 @@ class FileSystemMonitor:
                 # add new files
                 for d in self._cfg.image_dirs:
                     for path in Path(d).rglob('*.*'):
-                        self._logger.debug(f'found file: {path}')
                         if (path.is_file() and path.suffix[1:] in self._cfg.supported_image_extensions):
                             if path.__str__() in self._cache:
                                 continue  # file already in DB and cache
