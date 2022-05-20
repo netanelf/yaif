@@ -1,6 +1,6 @@
 import logging
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Frame
 from PIL import Image as PilImage, ImageTk, ImageFont, ImageDraw
 import os
 
@@ -15,18 +15,42 @@ class Display(tk.Tk):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._cfg = cfg
         self._image_list = image_list
-
-        # configure the root window
-        self.title('My Awesome App')
-        #self.attributes('-zoomed', True) # almost fullscreen
-        self.attributes('-fullscreen', True) # really full screen
-        self._screen_ratio = self._cfg.screen_size[0] / self._cfg.screen_size[1]
-        self._view_window = tk.Canvas(self, bg="white")
-        self._view_window.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        self._back_b = ttk.Button(self, text="back", command=self._back_one_image)
-        self._back_b.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=False)
         self._first_image_shown = False
+        self._screen_ratio = self._cfg.screen_size[0] / self._cfg.screen_size[1]
+        self._after_handler = None
+        self._create_gui()
         self._show_next_image()
+
+    def _create_gui(self):
+        self.title('YAIF (YetAnotherImageFrame)')
+        if self._cfg.run_true_fullscreen:
+            self.attributes('-fullscreen', True)  # really full screen
+        else:
+            self.attributes('-zoomed', True)  # almost fullscreen
+
+        self._view_window = tk.Canvas(self, width=self._cfg.screen_size[1], height=self._cfg.screen_size[0])
+        self._view_window.pack(fill=tk.BOTH, expand=True)
+
+        self._create_side_panel()
+
+    def _create_side_panel(self):
+        self._side_panel = Frame(self._view_window)
+
+        self._exit_b = ttk.Button(self._side_panel, text="exit", command=self._exit)
+        self._exit_b.pack(side=tk.TOP, fill=tk.BOTH, expand=False, pady=20)
+
+        self._back_b = tk.Button(self._side_panel, text="back", command=self._back_one_image)
+        self._back_b.pack(side=tk.TOP, fill=tk.BOTH, expand=False, pady=20)
+
+        self._next_b = tk.Button(self._side_panel, text="next", command=self._show_next_image)
+        self._next_b.pack(side=tk.TOP, fill=tk.BOTH, expand=False, pady=20)
+
+        self._side_panel_canvas = self._view_window.create_window(
+            0,
+            0,
+            anchor="nw",
+            window=self._side_panel,
+        )
 
     def _back_one_image(self, event=None):
         image = self._image_list.get_last_shown_image()
@@ -35,7 +59,12 @@ class Display(tk.Tk):
     def _show_next_image(self):
         image = self._image_list.get_next_image()
         self._show_image(image)
-        self.after(self._cfg.display_time_sec * 1000, self._show_next_image)
+        if self._after_handler is not None:
+            self.after_cancel(self._after_handler)
+        self._after_handler = self.after(self._cfg.display_time_sec * 1000, self._show_next_image)
+
+    def _exit(self):
+        self.destroy()
 
     def _show_image(self, image: Image):
         im = PilImage.open(image.image_path)
@@ -43,6 +72,7 @@ class Display(tk.Tk):
         im = self._add_annotations(im, image)
         im = ImageTk.PhotoImage(im)
         self._view_window.image = im
+        self._saved_im = im
         if not self._first_image_shown:
             self._image_container = self._view_window.create_image(
                 int(self._cfg.screen_size[1] / 2), int(self._cfg.screen_size[0] / 2),
@@ -54,7 +84,7 @@ class Display(tk.Tk):
             self._view_window.itemconfig(self._image_container, image=im)
 
     def _add_annotations(self, im: PilImage, image_data: Image):
-        font = ImageFont.truetype("Ubuntu-BI.ttf", 24)
+        font = ImageFont.truetype("../assets/FreeSansBold.ttf", 24)
         draw = ImageDraw.Draw(im)
         draw.text((10, 10), f"{os.path.basename(image_data.image_path)}", (255, 0, 0), font=font)
         return im

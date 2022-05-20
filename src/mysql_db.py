@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 
 from db_base import DbBase
-from src.data_structs.image import Image
+from data_structs.image import Image
 
 
 class MySqlDb(DbBase):
