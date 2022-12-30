@@ -7,14 +7,18 @@ import os
 from configuration import Configuration
 from image_list import ImageList
 from data_structs.image import Image
+from screen_controller_base import ScreenControllerBase
 
 
 class Display(tk.Tk):
-    def __init__(self, cfg: Configuration, image_list: ImageList):
+    def __init__(self, cfg: Configuration, image_list: ImageList, screen_controller: ScreenControllerBase):
         super().__init__()
         self._logger = logging.getLogger(self.__class__.__name__)
         self._cfg = cfg
         self._image_list = image_list
+        self._screen_controller = screen_controller
+        self._screen_controller.turn_on_screen()
+
         self._first_image_shown = False
         self._screen_ratio = self._cfg.screen_size[0] / self._cfg.screen_size[1]
         self._after_handler = None
@@ -31,7 +35,7 @@ class Display(tk.Tk):
         self._view_window = tk.Canvas(self, width=self._cfg.screen_size[1], height=self._cfg.screen_size[0])
         self._view_window.pack(fill=tk.BOTH, expand=True)
 
-        self._create_side_panel()
+        #self._create_side_panel()
 
     def _create_side_panel(self):
         self._side_panel = Frame(self._view_window)
@@ -67,6 +71,7 @@ class Display(tk.Tk):
         self.destroy()
 
     def _show_image(self, image: Image):
+        self._logger.debug(f'trying to show image: {image.image_path}')
         im = PilImage.open(image.image_path)
         im = self._scale_image(im)
         im = self._add_annotations(im, image)

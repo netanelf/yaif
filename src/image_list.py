@@ -28,6 +28,8 @@ class ImageList:
         if self._image_index < len(self._image_list) - 1:
             self._image_index += 1
         else:
+            # when we went through the full list we can update the list from the DB
+            self._update_image_list()
             self._image_index = 0
 
         im = self._image_list[self._image_index - 1]
@@ -41,7 +43,7 @@ class ImageList:
         elif self._last_shown_image_ix < self._last_shown_images_size:
             self._last_shown_image_ix += 1
             return self._last_shown_images[-self._last_shown_image_ix]
-        else: # we want back to the last history image
+        else:  # we want back to the last history image
             return self._last_shown_images[0]
 
     def _update_image_list(self):
