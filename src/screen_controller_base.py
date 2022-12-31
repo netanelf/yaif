@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class ScreenControllerBase(ABC):
     @abstractmethod
-    def shutdown_screen(self):
+    def turn_off_screen(self):
         pass
 
     @abstractmethod
