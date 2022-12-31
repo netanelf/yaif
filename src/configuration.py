@@ -4,12 +4,12 @@ from typing import List, Tuple
 
 ########################################### DEFAULT CONFIGURATION  #####################################################
 IMAGE_DIRS = [
-    r'/home/netanel/Pictures',
+    r'/media/pi/IMAGES',
 ]
 
 DB_PATH = 'images.db'
 RUN_FULLSCREEN = True
-SCREEN_ENABLE_PIN_NUM = 5
+SCREEN_ENABLE_PIN_NUM = 3
 ########################################################################################################################
 
 
@@ -20,7 +20,7 @@ class Configuration:
     display_time_sec: int = field(default=10)
     supported_image_extensions: List[str] = field(default_factory=lambda: ['png', 'jpg'])
     periodic_monitor_freq_sec: int = field(default=60)
-    screen_size: Tuple[int] = field(default_factory=lambda: (1080, 1920))  #h, w
+    screen_size: Tuple[int] = field(default_factory=lambda: (600, 1024))  #h, w
     run_true_fullscreen: bool = field(default=False)
     screen_enable_pin_number: int = field(default=999)
 
